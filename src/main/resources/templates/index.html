@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Photo Gallery</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Hero Section -->
+    <div class="section-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="section-title">Discover and Share Beautiful Moments</h1>
+                <p class="section-description">
+                    Upload, organize, and share your favorite photos with friends and family.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                    <i class="fas fa-upload me-2"></i>Upload Photo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload New Photo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select Image</label>
+                            <input type="file" class="form-control" id="file" name="file" accept="image/*" required>
+                            <div id="imagePreviewContainer" class="mt-3 d-none text-center">
+                                <img id="imagePreview" class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" placeholder="Give your photo a title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                      placeholder="Add a short description for your photo"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cloud-upload-alt me-1"></i> Upload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(images)}" class="empty-state">
+        <i class="fas fa-images empty-state-icon"></i>
+        <h3 class="empty-state-title">No photos yet</h3>
+        <p class="empty-state-description">Start by uploading your first photo to create your gallery.</p>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <i class="fas fa-upload me-2"></i>Upload Your First Photo
+        </button>
+    </div>
+
+    <!-- Image Gallery -->
+    <div th:if="${not #lists.isEmpty(images)}" class="mt-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="imageGallery">
+            <div class="col" th:each="image : ${images}">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img th:src="${image.url}" class="card-img-top" th:alt="${image.title}">
+                        <span class="position-absolute top-0 end-0 badge bg-primary m-2">
+                                <i class="fas fa-eye me-1"></i> View
+                            </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${image.title}">Image Title</h5>
+                        <p class="card-text" th:text="${image.description}">Image description goes here.</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                <span th:text="${#temporals.format(image.lastModified, 'MMM dd, yyyy')}">Upload date</span>
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a th:href="${image.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i> Full Size
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger delete-btn"
+                                    th:data-key="${image.key}" th:data-title="${image.title}">
+                                <i class="fas fa-trash-alt me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center" th:if="${totalPages > 1}">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/(page=${currentPage - 1})}" aria-label="Previous">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                        th:classappend="${currentPage == i} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/(page=${i})}" th:text="${i}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/(page=${currentPage + 1})}" aria-label="Next">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Custom JavaScript for the index page -->
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image preview functionality
+            const fileInput = document.getElementById('file');
+            const imagePreview = document.getElementById('imagePreview');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            imagePreviewContainer.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        imagePreviewContainer.classList.add('d-none');
+                    }
+                });
+            }
+
+            // Show alert message function
+            function showAlert(message, type = 'success') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alertElement = document.createElement('div');
+                alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+                alertElement.role = 'alert';
+                alertElement.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+
+                alertContainer.appendChild(alertElement);
+
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    alertElement.classList.remove('show');
+                    setTimeout(() => alertElement.remove(), 300);
+                }, 5000);
+            }
+
+            // Delete image functionality
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const key = this.getAttribute('data-key');
+                    const title = this.getAttribute('data-title');
+
+                    // Create and show confirmation modal
+                    const confirmModal = document.createElement('div');
+                    confirmModal.className = 'modal fade';
+                    confirmModal.id = 'deleteConfirmModal';
+                    confirmModal.innerHTML = `
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete "${title}"?</p>
+                                    <p class="text-danger mb-0"><small>This action cannot be undone.</small></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                                        <i class="fas fa-trash-alt me-1"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(confirmModal);
+
+                    // Initialize and show the modal
+                    const bsModal = new bootstrap.Modal(confirmModal);
+                    bsModal.show();
+
+                    // Handle confirmation click
+                    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                        // Process deletion
+                        fetch(`/images/${key}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => {
+                            bsModal.hide();
+
+                            // Remove the modal from DOM after it's hidden
+                            confirmModal.addEventListener('hidden.bs.modal', function() {
+                                confirmModal.remove();
+                            });
+
+                            if (response.ok) {
+                                // Remove the card from the DOM
+                                const card = button.closest('.col');
+                                card.classList.add('animate__animated', 'animate__fadeOut');
+
+                                setTimeout(() => {
+                                    card.remove();
+
+                                    // Show success message
+                                    showAlert(`"${title}" has been successfully deleted.`);
+
+                                    // Check if gallery is empty
+                                    const remainingCards = document.querySelectorAll('#imageGallery .col');
+                                    if (remainingCards.length === 0) {
+                                        location.reload(); // Reload to show empty state
+                                    }
+                                }, 300);
+                            } else {
+                                showAlert('Failed to delete the image. Please try again.', 'danger');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            bsModal.hide();
+                            showAlert('An error occurred while deleting the image.', 'danger');
+
+                            // Remove the modal from DOM after it's hidden
+                            confirmModal.addEventListener('hidden.bs.modal', function() {
+                                confirmModal.remove();
+                            });
+                        });
+                    });
+                });
+            });
+
+            // Form validation
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const fileInput = document.getElementById('file');
+                    const titleInput = document.getElementById('title');
+
+                    if (!fileInput.files[0]) {
+                        showAlert('Please select an image to upload.', 'warning');
+                        return;
+                    }
+
+                    if (!titleInput.value.trim()) {
+                        showAlert('Please enter a title for your image.', 'warning');
+                        return;
+                    }
+
+                    // Submit the form if validation passes
+                    this.submit();
+                });
+            }
+
+            // Add fade-in animation to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+    </script>
+
+    <style>
+        /* Additional page-specific styles */
+        .card {
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+        }
+    </style>
+</th:block>
+</body>
+</html>
