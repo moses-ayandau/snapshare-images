@@ -25,12 +25,12 @@ public class S3Service {
     private final S3Client s3Client;
     private final ImageRepository imageRepository;
 
-    private static final String BUCKET_NAME = "snapshare-s3";
+    private static final String BUCKET_NAME = "snapshare-s3-bk";
 
     public S3Service(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
         s3Client = S3Client.builder()
-                .region(Region.US_WEST_2)
+                .region(Region.EU_CENTRAL_1)
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }
