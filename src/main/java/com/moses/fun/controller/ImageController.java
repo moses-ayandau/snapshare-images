@@ -38,14 +38,12 @@ public class ImageController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam("description") String description) {
-        // Upload the image to S3 and save metadata to the database
         s3Service.uploadImage(file, title, description);
-        return "redirect:/"; // Redirect to the home page
+        return "redirect:/";
     }
 
     @DeleteMapping("/images/{key}")
     public ResponseEntity<Void> deleteImage(@PathVariable String key) {
-        // Delete the image from S3 and the database
         s3Service.deleteImage(key);
         return ResponseEntity.ok().build(); // Return 200 OK
     }
