@@ -57,7 +57,6 @@ public class ImageController {
     @GetMapping("/api/images")
     @ResponseBody
     public ResponseEntity<List<Image>> getImages(@RequestParam(value = "page", defaultValue = "1") int page) {
-        // Fetch images from the database
         List<Image> images = s3Service.listImages(page, PAGE_SIZE);
         return ResponseEntity.ok(images); // Return JSON response
     }

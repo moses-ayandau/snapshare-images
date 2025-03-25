@@ -16,8 +16,8 @@ public class DataSourceConfig {
 
     @Bean
     public DataSource dataSource() {
-        System.out.println("url "+parameterStoreService.getParameter("/test/db/snapshare/url") );
-        System.out.println("username "+parameterStoreService.getParameter("/test/db/snapshare/username") );
+        System.out.println("url "+parameterStoreService.getParameter("/snapshare/db/url") );
+        System.out.println("username "+parameterStoreService.getParameter("/snapshare/db/username") );
         System.out.println("password "+parameterStoreService.getParameter("/snapshare/db/password") );
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
