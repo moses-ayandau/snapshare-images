@@ -26,7 +26,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ec-central-1
+          aws-region: eu-central-1
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -62,7 +62,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ec-central-1
+          aws-region: eu-central-1
 
       - name: Register new task definition
         id: task-def
@@ -71,7 +71,7 @@ jobs:
           aws ecs describe-task-definition --task-definition snapshare-task --query taskDefinition > task-definition.json
           
           # Update container image in task definition to use latest tag
-          jq '.containerDefinitions[0].image = "626635425934.dkr.ecr.us-west-2.amazonaws.com/snapshare:latest"' task-definition.json > new-task-definition.json
+          jq '.containerDefinitions[0].image = "443370714528.dkr.ecr.eu-central-1.amazonaws.com/snapshare:latest"' task-definition.json > new-task-definition.json
           
           # Register new task definition version
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
