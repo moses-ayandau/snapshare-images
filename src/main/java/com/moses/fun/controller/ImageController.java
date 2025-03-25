@@ -45,7 +45,7 @@ public class ImageController {
     @DeleteMapping("/images/{key}")
     public ResponseEntity<Void> deleteImage(@PathVariable String key) {
         s3Service.deleteImage(key);
-        return ResponseEntity.ok().build(); // Return 200 OK
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/health")
