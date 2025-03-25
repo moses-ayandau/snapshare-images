@@ -123,6 +123,6 @@ public class S3Service {
     }
 
     private String generatePresignedUrl(String key) {
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", BUCKET_NAME, Region.US_WEST_2, key);
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", BUCKET_NAME, Region.EU_CENTRAL_1, key);
     }
 }
