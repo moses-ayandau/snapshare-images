@@ -36,22 +36,17 @@ public class S3Service {
 
     public List<Image> listImages(int page, int size) {
         try {
-            // Fetch images from the database instead of S3
             List<Image> allImages = imageRepository.findAll();
             allImages.sort(Comparator.comparing(Image::getLastModified).reversed());
 
-            // Calculate start and end indices for the requested page
             int startIndex = (page - 1) * size;
 
-            // Check if the requested page is valid
             if (startIndex >= allImages.size()) {
                 return Collections.emptyList();
             }
 
-            // Calculate end index, ensuring we don't go beyond the list size
             int endIndex = Math.min(startIndex + size, allImages.size());
 
-            // Extract the sublist for the requested page
             return allImages.subList(startIndex, endIndex);
         } catch (Exception e) {
             log.error("Error listing images from database", e);
@@ -84,7 +79,6 @@ public class S3Service {
 
             String imageUrl = generatePresignedUrl(key);
 
-            // Save the image metadata to the database
             Image image = Image.builder()
                     .key(key)
                     .fileName(originalFilename)
@@ -106,7 +100,6 @@ public class S3Service {
 
     public void deleteImage(String key) {
         try {
-            // Delete the image from S3
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(BUCKET_NAME)
                     .key(key)
@@ -114,7 +107,6 @@ public class S3Service {
 
             s3Client.deleteObject(deleteObjectRequest);
 
-            // Delete the image metadata from the database
             imageRepository.deleteByKey(key);
         } catch (Exception e) {
             log.error("Error deleting image from S3 and database", e);
